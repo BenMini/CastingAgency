@@ -1,5 +1,7 @@
-from app import app, db, cli
+from app import create_app, db
 from app.models import Movie, Actor
+
+app = create_app()
 
 
 @app.shell_context_processor

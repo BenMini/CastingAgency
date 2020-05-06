@@ -1,5 +1,4 @@
-import os
-from flask import Flask, request, current_app
+from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_moment import Moment
@@ -17,16 +16,25 @@ def create_app(config_class=Config):
     app.config.from_object(config_class)
 
     cors.init_app(app)
+    db.app = app
     db.init_app(app)
     migrate.init_app(app, db)
     moment.init_app(app)
 
+    # CORS Headers
+    @app.after_request
+    def after_request(response):
+        response.headers.add('Access-Control-Allow-Headers',
+                             'Content-Type,Authorization,true')
+        response.headers.add('Access-Control-Allow-Methods',
+                             'GET,PUT,POST,DELETE,OPTIONS')
+        return response
+
+    # error blueprints
     from app.errors import bp as errors_bp
     app.register_blueprint(errors_bp)
 
-    from app.auth import bp as auth_bp
-    app.register_blueprint(auth_bp, url_prefix='/auth')
-
+    # main routes blueprints
     from app.main import bp as main_bp
     app.register_blueprint(main_bp)
 
@@ -34,6 +42,7 @@ def create_app(config_class=Config):
 
 
 APP = create_app()
+
 
 if __name__ == '__main__':
     APP.run(host='0.0.0.0', port=8080, debug=True)

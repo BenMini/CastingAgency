@@ -63,9 +63,9 @@ def get_actor_info(actor_id):
 def update_actor(actor_id):
     try:
         actor = Actor.query.filter(Actor.id == actor_id).first()
-        actor.name = json.dumps(request.json.get('name'), actor.name)
-        actor.age = json.dumps(request.json.get('age'), actor.age)
-        actor.gender = json.dumps(request.json.get('gender'), actor.gender)
+        actor.name = json.dumps(request.json.get('name'), None)
+        actor.age = json.dumps(request.json.get('age'), None)
+        actor.gender = json.dumps(request.json.get('gender'), None)
         actor.update()
         return jsonify({
             'success': True,
@@ -141,7 +141,8 @@ def get_movie_info(movie_id):
 def update_movie(movie_id):
     try:
         movie = Movie.query.filter(Movie.id == movie_id).first()
-        movie.name = json.dumps(request.json['name'])
+        movie.title = json.dumps(request.json['title'])
+        movie.release_date = json.dumps(request.json['release_date'])
         movie.update()
         return jsonify({
             'success': True,

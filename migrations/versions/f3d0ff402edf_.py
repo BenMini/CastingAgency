@@ -1,8 +1,8 @@
-"""movies and actors tables
+"""empty message
 
-Revision ID: 3874599be358
+Revision ID: f3d0ff402edf
 Revises: 
-Create Date: 2020-05-05 15:44:17.838564
+Create Date: 2020-05-06 15:18:01.929840
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '3874599be358'
+revision = 'f3d0ff402edf'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -28,7 +28,7 @@ def upgrade():
     op.create_table('movies',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('title', sa.String(length=140), nullable=True),
-    sa.Column('release_date', sa.DateTime(), nullable=True),
+    sa.Column('release_date', sa.Date(), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_movies_release_date'), 'movies', ['release_date'], unique=False)

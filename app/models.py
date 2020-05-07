@@ -46,7 +46,7 @@ class Actor(db.Model):
     gender = db.Column(db.String(30))
 
     def __repr__(self):
-        return f'<Actor {self.name}>'
+        return f'<Actor {self.id} {self.name} {self.gender}>'
 
     def short(self):
         print(json.loads(self.name))

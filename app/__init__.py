@@ -4,11 +4,14 @@ from flask_migrate import Migrate
 from flask_moment import Moment
 from config import Config
 from flask_cors import CORS
+# from authlib.integrations.flask_client import OAuth
+
 
 db = SQLAlchemy()
 migrate = Migrate()
 moment = Moment()
 cors = CORS()
+# oauth = OAuth()
 
 
 def create_app(config_class=Config):
@@ -20,6 +23,7 @@ def create_app(config_class=Config):
     db.init_app(app)
     migrate.init_app(app, db)
     moment.init_app(app)
+    # oauth.init_app(app)
 
     # CORS Headers
     @app.after_request
@@ -37,6 +41,10 @@ def create_app(config_class=Config):
     # main routes blueprints
     from app.main import bp as main_bp
     app.register_blueprint(main_bp)
+
+    # auth routes blueprint
+    # from app.auth import bp as auth_bp
+    # app.register_blueprint(auth_bp)
 
     return app
 

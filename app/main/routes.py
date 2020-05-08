@@ -1,7 +1,9 @@
 
-from flask import request, jsonify, abort, json
+from flask import request, jsonify, abort, json, session, redirect, \
+    url_for
 from app.models import Movie, Actor
-from app.auth.auth import AuthError, requires_auth
+from app.auth.auth import requires_auth, AUTH0_DOMAIN
+from six.moves.urllib.parse import urlencode
 from app.main import bp
 
 
@@ -28,7 +30,8 @@ def get_actors():
 
 
 @bp.route('/actors', methods=['POST'])
-def create_actor():
+@requires_auth('post:actor')
+def create_actor(payload):
     try:
         actor = Actor(
             name=json.dumps(request.json['name']),
@@ -47,7 +50,8 @@ def create_actor():
 
 
 @bp.route('/actors/<actor_id>', methods=['GET'])
-def get_actor_info(actor_id):
+@requires_auth('get:actor-info')
+def get_actor_info(payload, actor_id):
     try:
         actor = Actor.query.filter(Actor.id == actor_id).first()
         return jsonify({
@@ -60,7 +64,8 @@ def get_actor_info(actor_id):
 
 
 @bp.route('/actors/<actor_id>', methods=['PATCH'])
-def update_actor(actor_id):
+@requires_auth('patch:actor')
+def update_actor(payload, actor_id):
     try:
         actor = Actor.query.filter(Actor.id == actor_id).first()
         actor.name = json.dumps(request.json.get('name'), None)
@@ -77,7 +82,8 @@ def update_actor(actor_id):
 
 
 @bp.route('/actors/<actor_id>', methods=['DELETE'])
-def delete_actor(actor_id):
+@requires_auth('delete:actor')
+def delete_actor(payload, actor_id):
     try:
         actor = Actor.query.filter(Actor.id == actor_id).first()
         actor.delete()
@@ -106,7 +112,8 @@ def get_movies():
 
 
 @bp.route('/movies', methods=['POST'])
-def create_movie():
+@requires_auth('post:movie')
+def create_movie(payload):
     try:
         movie = Movie(
             title=json.dumps(request.json['title']),
@@ -123,7 +130,8 @@ def create_movie():
 
 
 @bp.route('/movies/<movie_id>', methods=['GET'])
-def get_movie_info(movie_id):
+@requires_auth('get:movie-info')
+def get_movie_info(payload, movie_id):
     try:
         movie = Movie.query.filter(Movie.id == movie_id).first()
         return jsonify({
@@ -134,11 +142,10 @@ def get_movie_info(movie_id):
         print(e)
         abort(404)
 
-        return get_movie_info()
-
 
 @bp.route('/movies/<movie_id>', methods=['PATCH'])
-def update_movie(movie_id):
+@requires_auth('patch:movie')
+def update_movie(payload, movie_id):
     try:
         movie = Movie.query.filter(Movie.id == movie_id).first()
         movie.title = json.dumps(request.json['title'])
@@ -154,7 +161,8 @@ def update_movie(movie_id):
 
 
 @bp.route('/movies/<movie_id>', methods=['DELETE'])
-def delete_movie(movie_id):
+@requires_auth('delete:movie')
+def delete_movie(payload, movie_id):
     try:
         movie = Movie.query.filter(Movie.id == movie_id).first()
         movie.delete()

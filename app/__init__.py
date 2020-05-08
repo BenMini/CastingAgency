@@ -23,6 +23,10 @@ def create_app(config_class=Config):
     db.init_app(app)
     migrate.init_app(app, db)
     moment.init_app(app)
+
+    # Reset Database
+    # db.drop_all()
+    # db.create_all()
     # oauth.init_app(app)
 
     # CORS Headers

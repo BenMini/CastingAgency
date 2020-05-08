@@ -1,9 +1,7 @@
 
-from flask import request, jsonify, abort, json, session, redirect, \
-    url_for
+from flask import request, jsonify, abort, json
 from app.models import Movie, Actor
-from app.auth.auth import requires_auth, AUTH0_DOMAIN
-from six.moves.urllib.parse import urlencode
+from app.auth.auth import requires_auth
 from app.main import bp
 
 

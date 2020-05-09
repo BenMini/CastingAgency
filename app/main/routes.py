@@ -1,5 +1,5 @@
 
-from flask import request, jsonify, abort, json
+from flask import request, jsonify, abort
 from app.models import Movie, Actor
 from app.auth.auth import requires_auth
 from app.main import bp
@@ -28,14 +28,10 @@ def get_actors():
 
 
 @bp.route('/actors', methods=['POST'])
-# @requires_auth('post:actor')
-def create_actor():
+@requires_auth('post:actor')
+def create_actor(payload):
     try:
-        actor = Actor(
-            name=json.dumps(request.json['name']),
-            age=json.dumps(request.json['age']),
-            gender=json.dumps(request.json['gender'])
-        )
+        actor = Actor(**request.json)
         actor.insert()
         return jsonify({
             'success': True,
@@ -66,9 +62,9 @@ def get_actor_info(payload, actor_id):
 def update_actor(payload, actor_id):
     try:
         actor = Actor.query.filter(Actor.id == actor_id).first()
-        actor.name = json.dumps(request.json.get('name'), None)
-        actor.age = json.dumps(request.json.get('age'), None)
-        actor.gender = json.dumps(request.json.get('gender'), None)
+        actor.name = request.json.get['name']
+        actor.age = request.json.get['age']
+        actor.gender = request.json.get['gender']
         actor.update()
         return jsonify({
             'success': True,
@@ -113,10 +109,7 @@ def get_movies():
 @requires_auth('post:movie')
 def create_movie(payload):
     try:
-        movie = Movie(
-            title=json.dumps(request.json['title']),
-            release_date=json.dumps(request.json['release_date'])
-        )
+        movie = Movie(**request.json)
         movie.insert()
         return jsonify({
             'success': True,
@@ -146,8 +139,8 @@ def get_movie_info(payload, movie_id):
 def update_movie(payload, movie_id):
     try:
         movie = Movie.query.filter(Movie.id == movie_id).first()
-        movie.title = json.dumps(request.json['title'])
-        movie.release_date = json.dumps(request.json['release_date'])
+        movie.title = request.json['title']
+        movie.release_date = request.json['release_date']
         movie.update()
         return jsonify({
             'success': True,

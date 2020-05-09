@@ -12,14 +12,12 @@ class Movie(db.Model):
         return f'<Movie {self.id} {self.title} {self.release_date}>'
 
     def short(self):
-        print(json.loads(self.title))
         return {
             'id': self.id,
             'title': self.title,
         }
 
     def long(self):
-        print(json.loads(self.title))
         return {
             'id': self.id,
             'title': self.title,
@@ -49,14 +47,12 @@ class Actor(db.Model):
         return f'<Actor {self.id} {self.name} {self.gender}>'
 
     def short(self):
-        print(json.loads(self.name))
         return {
             'id': self.id,
             'name': self.name
         }
 
     def long(self):
-        print(json.loads(self.name))
         return {
             'id': self.id,
             'name': self.name,

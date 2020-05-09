@@ -23,32 +23,30 @@ class CapstoneTestCase(unittest.TestCase):
     def setUp(self):
         self.app = create_app(TestConfig)
         self.client = self.app.test_client
+
         self.app_context = self.app.app_context()
         self.app_context.push()
+
         self.CASTING_ASSISTANT_HEADER = {
-            'Authorization': 'Bearer ' + os.environ['CAST_ASSIST_JWT']
+            'Authorization': 'bearer ' + os.environ['CAST_ASSIST_JWT']
         }
         self.CASTING_DIRECTOR_HEADER = {
-            'Authorization': 'Bearer ' + os.environ['CAST_DIR_JWT']
+            'Authorization': 'bearer ' + os.environ['CAST_DIR_JWT']
         }
         self.EXEC_PRODUCER_HEADER = {
-            'Authorization': 'Bearer ' + os.environ['EXEC_PROD_JWT']
+            'Authorization': 'bearer ' + os.environ['EXEC_PROD_JWT']
         }
-        db.create_all()
-
         self.actor = {
-            "name": "Brad Pitt",
+            "name": "Tom Cruise",
             "age": 40,
             "gender": "male"
         }
-
         self.movie = {
             "title": "The Green Mile",
             "release_date": "1999-12-06"
         }
-        db.session.add(self.movie)
-        db.session.add(self.actor)
-        db.session.commit()
+
+        db.create_all()
 
     def tearDown(self):
         db.session.remove()
@@ -71,24 +69,34 @@ class CapstoneTestCase(unittest.TestCase):
         self.assertEqual(data['success'], True)
 
 # -----------------------------------------------
+# Executive Producer Tests
+# -----------------------------------------------
+    def test_ep_post_movie(self):
+        res = self.client().post(
+            '/actors', headers=self.EXEC_PRODUCER_HEADER,
+            json=self.movie)
+        data = json.loads(res.data)
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+# -----------------------------------------------
 # Casting Assistant Tests
 # -----------------------------------------------
 
-    def test_get_actor_info(self):
+    def test_ca_get_actor_info(self):
         res = self.client().get(
             '/actors/1', headers=self.CASTING_ASSISTANT_HEADER)
         data = json.loads(res.data)
         self.assertEqual(res.status_code, 200)
         self.assertTrue('actors' in data)
 
-    def test_get_movie_info(self):
+    def test_ca_get_movie_info(self):
         res = self.client().get(
             '/movies/1', headers=self.CASTING_ASSISTANT_HEADER)
         data = json.loads(res.data)
         self.assertEqual(res.status_code, 200)
         self.assertTrue('movies' in data)
 
-    def test_post_actor_error(self):
+    def test_ca_post_actor_error(self):
         res = self.client().post(
             '/actors', headers=self.CASTING_ASSISTANT_HEADER)
         data = json.loads(res.data)

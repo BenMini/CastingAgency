@@ -7,31 +7,16 @@ Tests:
 import os
 import unittest
 import json
-from app import create_app, db
-from app.models import Movie, Actor
-from app.errors import handlers
-from config import Config
 
-executive_producer = os.environ['EXEC_PROD_JWT']
-casting_director = os.environ['CAST_DIR_JWT']
-casting_assistant = os.environ['CAST_ASSIST_JWT']
+from app import create_app, db
+from flask_sqlalchemy import SQLAlchemy
+from app.models import Movie, Actor
+from config import Config
 
 
 class TestConfig(Config):
     TESTING = True
     SQLALCHEMY_DATABASE_URI = 'sqlite://'
-
-
-actor = {
-    "name": "Brad Pitt",
-    "age": 40,
-    "gender": "male"
-}
-
-movie = {
-    "title": "The Green Mile",
-    "release_date": "1999-12-06"
-}
 
 
 class CapstoneTestCase(unittest.TestCase):
@@ -40,9 +25,30 @@ class CapstoneTestCase(unittest.TestCase):
         self.client = self.app.test_client
         self.app_context = self.app.app_context()
         self.app_context.push()
+        self.CASTING_ASSISTANT_HEADER = {
+            'Authorization': 'Bearer ' + os.environ['CAST_ASSIST_JWT']
+        }
+        self.CASTING_DIRECTOR_HEADER = {
+            'Authorization': 'Bearer ' + os.environ['CAST_DIR_JWT']
+        }
+        self.EXEC_PRODUCER_HEADER = {
+            'Authorization': 'Bearer ' + os.environ['EXEC_PROD_JWT']
+        }
         db.create_all()
-        self.actor = actor
-        self.movie = movie
+
+        self.actor = {
+            "name": "Brad Pitt",
+            "age": 40,
+            "gender": "male"
+        }
+
+        self.movie = {
+            "title": "The Green Mile",
+            "release_date": "1999-12-06"
+        }
+        db.session.add(self.movie)
+        db.session.add(self.actor)
+        db.session.commit()
 
     def tearDown(self):
         db.session.remove()
@@ -67,6 +73,27 @@ class CapstoneTestCase(unittest.TestCase):
 # -----------------------------------------------
 # Casting Assistant Tests
 # -----------------------------------------------
+
+    def test_get_actor_info(self):
+        res = self.client().get(
+            '/actors/1', headers=self.CASTING_ASSISTANT_HEADER)
+        data = json.loads(res.data)
+        self.assertEqual(res.status_code, 200)
+        self.assertTrue('actors' in data)
+
+    def test_get_movie_info(self):
+        res = self.client().get(
+            '/movies/1', headers=self.CASTING_ASSISTANT_HEADER)
+        data = json.loads(res.data)
+        self.assertEqual(res.status_code, 200)
+        self.assertTrue('movies' in data)
+
+    def test_post_actor_error(self):
+        res = self.client().post(
+            '/actors', headers=self.CASTING_ASSISTANT_HEADER)
+        data = json.loads(res.data)
+        self.assertNotEqual(res.status_code, 200)
+        self.assertFalse('actors' in data)
 
 
 if __name__ == '__main__':

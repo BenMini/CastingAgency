@@ -28,8 +28,8 @@ def get_actors():
 
 
 @bp.route('/actors', methods=['POST'])
-@requires_auth('post:actor')
-def create_actor(payload):
+# @requires_auth('post:actor')
+def create_actor():
     try:
         actor = Actor(
             name=json.dumps(request.json['name']),

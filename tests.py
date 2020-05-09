@@ -56,6 +56,8 @@ class CapstoneTestCase(unittest.TestCase):
 # -----------------------------------------------
 # No Authentication Tests (GET '/actors' and '/movies')
 # -----------------------------------------------
+   
+
     def test_get_actors(self):
         res = self.client().get('/actors')
         data = json.loads(res.data)

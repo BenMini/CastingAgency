@@ -62,9 +62,9 @@ def get_actor_info(payload, actor_id):
 def update_actor(payload, actor_id):
     try:
         actor = Actor.query.filter(Actor.id == actor_id).first()
-        actor.name = request.json.get['name']
-        actor.age = request.json.get['age']
-        actor.gender = request.json.get['gender']
+        actor.name = request.json('name')
+        actor.age = request.json('age')
+        actor.gender = request.json('gender')
         actor.update()
         return jsonify({
             'success': True,
@@ -139,8 +139,7 @@ def get_movie_info(payload, movie_id):
 def update_movie(payload, movie_id):
     try:
         movie = Movie.query.filter(Movie.id == movie_id).first()
-        movie.title = request.json['title']
-        movie.release_date = request.json['release_date']
+        movie(**request.json)
         movie.update()
         return jsonify({
             'success': True,

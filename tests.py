@@ -9,7 +9,6 @@ import unittest
 import json
 
 from app import create_app, db
-from flask_sqlalchemy import SQLAlchemy
 from app.models import Movie, Actor
 from config import Config
 

@@ -25,8 +25,8 @@ def create_app(config_class=Config):
     moment.init_app(app)
 
     # Reset Database
-    db.drop_all()
-    db.create_all()
+    # db.drop_all()
+    # db.create_all()
     # oauth.init_app(app)
 
     # CORS Headers

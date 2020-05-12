@@ -1,1 +1,1 @@
-web: flask db upgrade; gunicorn casting_agency:APP
+web: flask db upgrade; gunicorn casting_agency:create_app()

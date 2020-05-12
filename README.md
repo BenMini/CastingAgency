@@ -15,7 +15,7 @@ There are three roles associated with API:
 Those without roles are limited to the viewing of the movie and actor list.
 
 ## Hosting
-App is hosted [here](https://heroku.com)
+App is hosted [here](https://ben-capstone-fsnd.herokuapp.com/)
 
 ## Local Requirements
 Requires Python 3.7 or later

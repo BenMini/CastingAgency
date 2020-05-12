@@ -31,7 +31,11 @@ def get_actors():
 @requires_auth('post:actor')
 def create_actor(payload):
     try:
-        actor = Actor(**request.json)
+        actor = Actor(
+            name=request.json['name'],
+            age=request.json['age'],
+            gender=request.json['gender']
+        )
         actor.insert()
         return jsonify({
             'success': True,
@@ -62,9 +66,9 @@ def get_actor_info(payload, actor_id):
 def update_actor(payload, actor_id):
     try:
         actor = Actor.query.filter(Actor.id == actor_id).first()
-        actor.name = request.json('name')
-        actor.age = request.json('age')
-        actor.gender = request.json('gender')
+        actor.name = request.json.get("name")
+        actor.age = request.json.get("age")
+        actor.gender = request.json.get("gender")
         actor.update()
         return jsonify({
             'success': True,
@@ -109,7 +113,9 @@ def get_movies():
 @requires_auth('post:movie')
 def create_movie(payload):
     try:
-        movie = Movie(**request.json)
+        movie = Movie(
+            title=request.json['title'],
+            release_date=request.json['release_date'])
         movie.insert()
         return jsonify({
             'success': True,
@@ -139,7 +145,9 @@ def get_movie_info(payload, movie_id):
 def update_movie(payload, movie_id):
     try:
         movie = Movie.query.filter(Movie.id == movie_id).first()
-        movie(**request.json)
+        movie.title = request.json.get('title')
+        movie.release_date = request.json.get('release_date')
+
         movie.update()
         return jsonify({
             'success': True,

@@ -16,7 +16,8 @@ from config import Config
 
 class TestConfig(Config):
     TESTING = True
-    SQLALCHEMY_DATABASE_URI = 'sqlite://'
+    SQLALCHEMY_DATABASE_URI = "postgres://{}/{}".format(
+        'localhost:5432', "test_capstone")
 
 
 class CapstoneTestCase(unittest.TestCase):
@@ -36,17 +37,14 @@ class CapstoneTestCase(unittest.TestCase):
         self.EXEC_PRODUCER_HEADER = {
             'Authorization': 'bearer ' + os.environ['EXEC_PROD_JWT']
         }
-        self.actor = {
-            "name": "Tom Cruise",
-            "age": 40,
-            "gender": "male"
-        }
-        self.movie = {
-            "title": "The Green Mile",
-            "release_date": "1999-12-06"
-        }
 
         db.create_all()
+        a = Actor(name='Tom Cruise', age=40, gender='male')
+        db.session.add(a)
+        db.session.commit()
+        m = Movie(title='The Green Mile', release_date='2019-01-01')
+        db.session.add(m)
+        db.session.commit()
 
     def tearDown(self):
         db.session.remove()
@@ -56,7 +54,6 @@ class CapstoneTestCase(unittest.TestCase):
 # -----------------------------------------------
 # No Authentication Tests (GET '/actors' and '/movies')
 # -----------------------------------------------
-   
 
     def test_get_actors(self):
         res = self.client().get('/actors')
@@ -73,37 +70,205 @@ class CapstoneTestCase(unittest.TestCase):
 # -----------------------------------------------
 # Executive Producer Tests
 # -----------------------------------------------
-    def test_ep_post_movie(self):
+    def test_a_ep_post_movie(self):
         res = self.client().post(
-            '/actors', headers=self.EXEC_PRODUCER_HEADER,
-            json=self.movie)
+            '/movies', headers=self.EXEC_PRODUCER_HEADER,
+            json={
+                "title": "Shawshank Redemption",
+                "release_date": "1994-09-22"})
         data = json.loads(res.data)
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
+
+    def test_b_ep_post_actors(self):
+        res = self.client().post(
+            '/actors', headers=self.EXEC_PRODUCER_HEADER,
+            json={
+                "name": "Natalie Portman",
+                "age": 38,
+                "gender": "female"})
+        data = json.loads(res.data)
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+
+    def test_c_ep_get_actor_info(self):
+        res = self.client().get(
+            '/actors/1', headers=self.EXEC_PRODUCER_HEADER)
+        data = json.loads(res.data)
+        self.assertEqual(res.status_code, 200)
+        self.assertTrue('actors' in data)
+
+    def test_d_ep_get_movie_info(self):
+        res = self.client().get(
+            '/movies/1', headers=self.EXEC_PRODUCER_HEADER)
+        data = json.loads(res.data)
+        self.assertEqual(res.status_code, 200)
+        self.assertTrue('movies' in data)
+
+    def test_e_ep_patch_movie(self):
+        res = self.client().patch(
+            '/movies/1', headers=self.EXEC_PRODUCER_HEADER,
+            json={
+                "title": "Black Swan",
+                "release_date": "2010-12-03"})
+        data = json.loads(res.data)
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+
+    def test_f_ep_patch_actors(self):
+        res = self.client().patch(
+            '/actors/1', headers=self.EXEC_PRODUCER_HEADER,
+            json={
+                "name": "Penelope Cruz",
+                "age": 46,
+                "gender": "female"})
+        data = json.loads(res.data)
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+
+    def test_g_ep_delete_actors(self):
+        res = self.client().delete(
+            '/actors/1', headers=self.EXEC_PRODUCER_HEADER)
+        data = json.loads(res.data)
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+
+    def test_h_ep_delete_movies(self):
+        res = self.client().delete(
+            '/movies/1', headers=self.EXEC_PRODUCER_HEADER)
+        data = json.loads(res.data)
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+
+# -----------------------------------------------
+# Casting Director Tests
+# -----------------------------------------------
+    def test_i_cd_get_actor_info(self):
+        res = self.client().get(
+            '/actors/1', headers=self.CASTING_DIRECTOR_HEADER)
+        data = json.loads(res.data)
+        self.assertEqual(res.status_code, 200)
+        self.assertTrue('actors' in data)
+
+    def test_j_cd_get_movie_info(self):
+        res = self.client().get(
+            '/movies/1', headers=self.CASTING_DIRECTOR_HEADER)
+        data = json.loads(res.data)
+        self.assertEqual(res.status_code, 200)
+        self.assertTrue('movies' in data)
+
+    def test_k_cd_post_movie(self):
+        res = self.client().post(
+            '/movies', headers=self.CASTING_DIRECTOR_HEADER,
+            json={
+                "title": "Black Swan",
+                "release_date": "2010-12-03"})
+        self.assertNotEqual(res.status_code, 200)
+
+    def test_l_cd_patch_movie(self):
+        res = self.client().patch(
+            '/movies/1', headers=self.CASTING_DIRECTOR_HEADER,
+            json={
+                "title": "Fight Club",
+                "release_date": "1999-12-03"})
+        data = json.loads(res.data)
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+
+    def test_m_cd_post_actors(self):
+        res = self.client().post(
+            '/actors', headers=self.CASTING_DIRECTOR_HEADER,
+            json={
+                "name": "Natalie Portman",
+                "age": 38,
+                "gender": "female"})
+        data = json.loads(res.data)
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+
+    def test_n_cd_patch_actors(self):
+        res = self.client().patch(
+            '/actors/1', headers=self.CASTING_DIRECTOR_HEADER,
+            json={
+                "name": "Brad Pitt",
+                "age": 38,
+                "gender": "male"})
+        data = json.loads(res.data)
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+
+    def test_o_cd_delete_actors(self):
+        res = self.client().delete(
+            '/actors/1', headers=self.CASTING_DIRECTOR_HEADER)
+        data = json.loads(res.data)
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+
+    def test_p_cd_delete_movies(self):
+        res = self.client().delete(
+            '/movies/1', headers=self.CASTING_DIRECTOR_HEADER)
+        self.assertNotEqual(res.status_code, 200)
+
 # -----------------------------------------------
 # Casting Assistant Tests
 # -----------------------------------------------
-
-    def test_ca_get_actor_info(self):
+    def test_q_ca_get_actor_info(self):
         res = self.client().get(
             '/actors/1', headers=self.CASTING_ASSISTANT_HEADER)
         data = json.loads(res.data)
         self.assertEqual(res.status_code, 200)
         self.assertTrue('actors' in data)
 
-    def test_ca_get_movie_info(self):
+    def test_r_ca_get_movie_info(self):
         res = self.client().get(
             '/movies/1', headers=self.CASTING_ASSISTANT_HEADER)
         data = json.loads(res.data)
         self.assertEqual(res.status_code, 200)
         self.assertTrue('movies' in data)
 
-    def test_ca_post_actor_error(self):
+    def test_s_ca_post_movie(self):
         res = self.client().post(
-            '/actors', headers=self.CASTING_ASSISTANT_HEADER)
-        data = json.loads(res.data)
+            '/movies', headers=self.CASTING_ASSISTANT_HEADER,
+            json={
+                "title": "Black Swan",
+                "release_date": "2010-12-03"})
         self.assertNotEqual(res.status_code, 200)
-        self.assertFalse('actors' in data)
+
+    def test_t_ca_patch_movie(self):
+        res = self.client().patch(
+            '/movies/1', headers=self.CASTING_ASSISTANT_HEADER,
+            json={
+                "title": "Fight Club",
+                "release_date": "1999-12-03"})
+        self.assertNotEqual(res.status_code, 200)
+
+    def test_u_ca_post_actors(self):
+        res = self.client().post(
+            '/actors', headers=self.CASTING_ASSISTANT_HEADER,
+            json={
+                "name": "Natalie Portman",
+                "age": 38,
+                "gender": "female"})
+        self.assertNotEqual(res.status_code, 200)
+
+    def test_v_ca_patch_actors(self):
+        res = self.client().patch(
+            '/actors/1', headers=self.CASTING_ASSISTANT_HEADER,
+            json={
+                "name": "Brad Pitt",
+                "age": 38,
+                "gender": "male"})
+        self.assertNotEqual(res.status_code, 200)
+
+    def test_w_ca_delete_actors(self):
+        res = self.client().delete(
+            '/actors/1', headers=self.CASTING_ASSISTANT_HEADER)
+        self.assertNotEqual(res.status_code, 200)
+
+    def test_x_ca_delete_movies(self):
+        res = self.client().delete(
+            '/movies/1', headers=self.CASTING_ASSISTANT_HEADER)
+        self.assertNotEqual(res.status_code, 200)
 
 
 if __name__ == '__main__':
